@@ -9,6 +9,22 @@ library(ellipse)
 # Set seed for reproducibility
 set.seed(123)
 
+# --- Set output directory ---
+# Ensure files are saved in Task1 directory
+task1_dir <- "Task1"
+if (!dir.exists(task1_dir)) {
+  # If Task1 directory doesn't exist, try to create it or use current directory
+  if (basename(getwd()) == "Task1") {
+    task1_dir <- "."
+  } else {
+    dir.create(task1_dir, showWarnings = FALSE)
+  }
+}
+# If we're already in Task1 directory, use current directory
+if (basename(getwd()) == "Task1") {
+  task1_dir <- "."
+}
+
 # --- Configuration & Parameters ---
 
 # Define Sample Volumes (Sample Sizes)
@@ -100,7 +116,7 @@ print(p)
 # Generate PDF using static plot
 # Note: plotly doesn't work well with pdf(), so we'll use scatterplot3d for PDF
 
-pdf("Task1_Results.pdf", width = 8, height = 6)
+pdf(file.path(task1_dir, "Task1_Results.pdf"), width = 8, height = 6)
 
 all_data <- rbind(data1, data2, data3)
 colors <- c(rep("red", n1), rep("blue", n2), rep("green", n3))
@@ -202,13 +218,12 @@ legend3d("topright",
          pch = 16)
 
 # Save 3D plot
-# Сохраняем в текущей директории (где запускается скрипт)
-rgl.snapshot("Task1_3D_with_ellipsoids.png", fmt = "png")
-cat("\n3D plot with ellipsoids saved as Task1_3D_with_ellipsoids.png\n")
-cat("Note: If running from Task1/, file will be in Task1/ directory\n")
+# Сохраняем в папку Task1
+rgl.snapshot(file.path(task1_dir, "Task1_3D_with_ellipsoids.png"), fmt = "png")
+cat("\n3D plot with ellipsoids saved as", file.path(task1_dir, "Task1_3D_with_ellipsoids.png"), "\n")
 
 # --- Save analysis results to file for LaTeX report ---
-sink("Task1_analysis_results.txt")
+sink(file.path(task1_dir, "Task1_analysis_results.txt"))
 cat("=== COVARIANCE MATRICES ===\n\n")
 cat("Sub-sample 1 (Spherical):\n")
 print(sigma1)
@@ -226,5 +241,5 @@ for (analysis in list(analysis1, analysis2, analysis3)) {
 }
 sink()
 
-print("PDF generated successfully as Task1_Results.pdf")
-print("Analysis results saved to Task1_analysis_results.txt")
+print(paste("PDF generated successfully as", file.path(task1_dir, "Task1_Results.pdf")))
+print(paste("Analysis results saved to", file.path(task1_dir, "Task1_analysis_results.txt")))

@@ -1,0 +1,38 @@
+=== COVARIANCE MATRICES ===
+
+Sub-sample 1 (Spherical):
+     [,1] [,2] [,3]
+[1,]    1    0    0
+[2,]    0    1    0
+[3,]    0    0    1
+
+Sub-sample 2 (Stretched Z):
+     [,1] [,2] [,3]
+[1,]    1    0    0
+[2,]    0    1    0
+[3,]    0    0    5
+
+Sub-sample 3 (Correlated):
+     [,1] [,2] [,3]
+[1,]  1.0  0.8  0.8
+[2,]  0.8  1.0  0.8
+[3,]  0.8  0.8  1.0
+
+
+=== SPECTRAL DECOMPOSITION ===
+
+
+Sub-sample 1:
+Eigenvalues: 1, 1, 1 
+Semi-axes: 2.7955, 2.7955, 2.7955 
+Prop. variance: 33.33 %, 33.33 %, 33.33 % 
+
+Sub-sample 2:
+Eigenvalues: 5, 1, 1 
+Semi-axes: 6.2509, 2.7955, 2.7955 
+Prop. variance: 71.43 %, 14.29 %, 14.29 % 
+
+Sub-sample 3:
+Eigenvalues: 2.6, 0.2, 0.2 
+Semi-axes: 4.5076, 1.2502, 1.2502 
+Prop. variance: 86.67 %, 6.67 %, 6.67 % 
