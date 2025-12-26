@@ -1,0 +1,583 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{fontspec}
+\usepackage{polyglossia}
+\setdefaultlanguage{russian}
+% Используем системные шрифты с поддержкой кириллицы
+\setmainfont{Liberation Serif}[Ligatures=TeX]
+\setsansfont{Liberation Sans}[Ligatures=TeX]
+\setmonofont{Liberation Mono}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+
+\geometry{margin=2.5cm}
+
+\title{Факторный анализ многомерных данных\\Ортогональная модель с 3 факторами}
+\author{Елисеев Данила, 2025, ИС}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Теоретическая часть}
+
+Факторный анализ (Factor Analysis, FA) — это метод многомерного статистического анализа, направленный на выявление скрытых (латентных) факторов, объясняющих корреляции между наблюдаемыми переменными.
+
+\subsection{Ортогональная факторная модель}
+
+Ортогональная факторная модель имеет вид:
+\begin{equation}
+\mathbf{X} = \boldsymbol{\Lambda} \mathbf{F} + \boldsymbol{\Psi} \boldsymbol{\varepsilon},
+\label{eq:factor_model}
+\end{equation}
+где:
+\begin{itemize}
+\item $\mathbf{X} \in \mathbb{R}^{p}$ — вектор наблюдаемых переменных
+\item $\boldsymbol{\Lambda} \in \mathbb{R}^{p \times m}$ — матрица факторных нагрузок
+\item $\mathbf{F} \in \mathbb{R}^{m}$ — вектор общих факторов (латентные переменные)
+\item $\boldsymbol{\Psi} \in \mathbb{R}^{p \times p}$ — диагональная матрица уникальных дисперсий
+\item $\boldsymbol{\varepsilon} \in \mathbb{R}^{p}$ — вектор уникальных факторов (ошибки)
+\end{itemize}
+
+Предположения модели:
+\begin{itemize}
+\item $\mathrm{E}[\mathbf{F}] = \mathbf{0}$, $\mathrm{Cov}(\mathbf{F}) = \mathbf{I}$ — факторы центрированы и некоррелированы
+\item $\mathrm{E}[\boldsymbol{\varepsilon}] = \mathbf{0}$, $\mathrm{Cov}(\boldsymbol{\varepsilon}) = \mathbf{I}$ — уникальные факторы центрированы и некоррелированы
+\item $\mathrm{Cov}(\mathbf{F}, \boldsymbol{\varepsilon}) = \mathbf{0}$ — факторы и ошибки некоррелированы
+\end{itemize}
+
+Ковариационная матрица наблюдаемых переменных:
+\begin{equation}
+\boldsymbol{\Sigma} = \boldsymbol{\Lambda} \boldsymbol{\Lambda}^\top + \boldsymbol{\Psi}.
+\label{eq:covariance}
+\end{equation}
+
+\subsection{Интерпретация параметров}
+
+\begin{itemize}
+\item \textbf{Факторные нагрузки} $\lambda_{ij}$ — корреляция между переменной $X_i$ и фактором $F_j$
+\item \textbf{Общность} (communality) $h_i^2 = \sum_{j=1}^{m} \lambda_{ij}^2$ — доля дисперсии переменной $X_i$, объясняемая общими факторами
+\item \textbf{Уникальность} $\psi_i$ — доля дисперсии переменной $X_i$, не объясняемая общими факторами
+\item $h_i^2 + \psi_i = 1$ для стандартизированных переменных
+\end{itemize}
+
+\subsection{Ротация факторов}
+
+Ротация факторов применяется для упрощения интерпретации. Наиболее распространённый метод — \textbf{Varimax ротация}, которая максимизирует дисперсию квадратов нагрузок по факторам, что приводит к:
+\begin{itemize}
+\item Факторам с несколькими высокими нагрузками и многими низкими
+\item Более простой интерпретации факторов
+\item Сохранению ортогональности факторов
+\end{itemize}
+
+\section{Описание данных}
+
+Для анализа использован синтетический многомерный набор данных с $p = 8$ переменными и объёмом выборки $n = 300$. Переменные:
+
+\begin{enumerate}
+\item \textbf{GDP\_Growth} — рост ВВП (экономический показатель)
+\item \textbf{Industrial\_Output} — промышленное производство (экономический показатель)
+\item \textbf{Trade\_Balance} — торговый баланс (экономический показатель)
+\item \textbf{Education\_Level} — уровень образования (социальный показатель)
+\item \textbf{Healthcare\_Index} — индекс здравоохранения (социальный показатель)
+\item \textbf{Air\_Quality} — качество воздуха (экологический показатель)
+\item \textbf{Water\_Quality} — качество воды (экологический показатель)
+\item \textbf{Random\_Noise} — случайный шум (независимая переменная)
+\end{enumerate}
+
+Ожидаемая факторная структура:
+\begin{itemize}
+\item \textbf{Фактор 1 (Экономический)}: переменные 1–3
+\item \textbf{Фактор 2 (Социальный)}: переменные 4–5
+\item \textbf{Фактор 3 (Экологический)}: переменные 6–7
+\item Переменная 8 (Random\_Noise) не должна нагружаться ни на один фактор
+\end{itemize}
+
+\section{Результаты факторного анализа}
+
+\subsection{Случай 1: Факторный анализ без ротации}
+
+Результаты факторного анализа с 3 факторами без ротации представлены в таблице~\ref{tab:fa_no_rotation}.
+
+\begin{table}[H]
+\centering
+\caption{Факторные нагрузки без ротации}
+\label{tab:fa_no_rotation}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Переменная & Фактор 1 & Фактор 2 & Фактор 3 \\
+\midrule
+GDP\_Growth & $\lambda_{11}$ & $\lambda_{12}$ & $\lambda_{13}$ \\
+Industrial\_Output & $\lambda_{21}$ & $\lambda_{22}$ & $\lambda_{23}$ \\
+Trade\_Balance & $\lambda_{31}$ & $\lambda_{32}$ & $\lambda_{33}$ \\
+Education\_Level & $\lambda_{41}$ & $\lambda_{42}$ & $\lambda_{43}$ \\
+Healthcare\_Index & $\lambda_{51}$ & $\lambda_{52}$ & $\lambda_{53}$ \\
+Air\_Quality & $\lambda_{61}$ & $\lambda_{62}$ & $\lambda_{63}$ \\
+Water\_Quality & $\lambda_{71}$ & $\lambda_{72}$ & $\lambda_{73}$ \\
+Random\_Noise & $\lambda_{81}$ & $\lambda_{82}$ & $\lambda_{83}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Особенности факторных нагрузок без ротации:}
+\begin{itemize}
+\item Нагрузки могут быть распределены по нескольким факторам
+\item Интерпретация факторов может быть затруднена
+\item Факторы соответствуют главным компонентам (если используется метод главных факторов)
+\end{itemize}
+
+\subsection{Случай 2: Факторный анализ с Varimax ротацией}
+
+После применения Varimax ротации факторные нагрузки становятся более интерпретируемыми (таблица~\ref{tab:fa_varimax}).
+
+\begin{table}[H]
+\centering
+\caption{Факторные нагрузки после Varimax ротации}
+\label{tab:fa_varimax}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Переменная & Фактор 1 & Фактор 2 & Фактор 3 \\
+\midrule
+GDP\_Growth & $\lambda_{11}'$ & $\lambda_{12}'$ & $\lambda_{13}'$ \\
+Industrial\_Output & $\lambda_{21}'$ & $\lambda_{22}'$ & $\lambda_{23}'$ \\
+Trade\_Balance & $\lambda_{31}'$ & $\lambda_{32}'$ & $\lambda_{33}'$ \\
+Education\_Level & $\lambda_{41}'$ & $\lambda_{42}'$ & $\lambda_{43}'$ \\
+Healthcare\_Index & $\lambda_{51}'$ & $\lambda_{52}'$ & $\lambda_{53}'$ \\
+Air\_Quality & $\lambda_{61}'$ & $\lambda_{62}'$ & $\lambda_{63}'$ \\
+Water\_Quality & $\lambda_{71}'$ & $\lambda_{72}'$ & $\lambda_{73}'$ \\
+Random\_Noise & $\lambda_{81}'$ & $\lambda_{82}'$ & $\lambda_{83}'$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Преимущества Varimax ротации:}
+\begin{itemize}
+\item Факторы становятся более интерпретируемыми
+\item Каждая переменная имеет высокую нагрузку только на один фактор
+\item Факторы остаются ортогональными (некоррелированными)
+\item Общности переменных не изменяются
+\end{itemize}
+
+\section{Интерпретация факторов}
+
+\subsection{Фактор 1: Экономическое развитие}
+
+После Varimax ротации Фактор 1 должен иметь высокие нагрузки на экономические переменные:
+\begin{itemize}
+\item GDP\_Growth
+\item Industrial\_Output
+\item Trade\_Balance
+\end{itemize}
+
+\textbf{Интерпретация:} Фактор 1 представляет \textbf{уровень экономического развития} региона/страны. Высокие значения фактора соответствуют:
+\begin{itemize}
+\item Высокому экономическому росту
+\item Развитой промышленности
+\item Положительному торговому балансу
+\end{itemize}
+
+\subsection{Фактор 2: Социальное развитие}
+
+Фактор 2 должен иметь высокие нагрузки на социальные переменные:
+\begin{itemize}
+\item Education\_Level
+\item Healthcare\_Index
+\end{itemize}
+
+\textbf{Интерпретация:} Фактор 2 представляет \textbf{уровень социального развития}. Высокие значения фактора соответствуют:
+\begin{itemize}
+\item Высокому уровню образования населения
+\item Развитой системе здравоохранения
+\end{itemize}
+
+\subsection{Фактор 3: Экологическое состояние}
+
+Фактор 3 должен иметь высокие нагрузки на экологические переменные:
+\begin{itemize}
+\item Air\_Quality
+\item Water\_Quality
+\end{itemize}
+
+\textbf{Интерпретация:} Фактор 3 представляет \textbf{экологическое состояние окружающей среды}. Высокие значения фактора соответствуют:
+\begin{itemize}
+\item Хорошему качеству воздуха
+\item Хорошему качеству воды
+\end{itemize}
+
+\section{Сравнение результатов до и после ротации}
+
+\subsection{Изменения в факторных нагрузках}
+
+После Varimax ротации:
+\begin{itemize}
+\item Нагрузки становятся более поляризованными (близки к 0 или к $\pm 1$)
+\item Каждая переменная имеет чёткую принадлежность к одному фактору
+\item Интерпретация факторов упрощается
+\end{itemize}
+
+\subsection{Сохранение свойств}
+
+Varimax ротация сохраняет:
+\begin{itemize}
+\item Ортогональность факторов (они остаются некоррелированными)
+\item Общности переменных ($h_i^2$ не изменяются)
+\item Общую объяснённую дисперсию
+\end{itemize}
+
+\subsection{Ротационная матрица}
+
+Ротация выполняется умножением матрицы нагрузок на ортогональную матрицу $\mathbf{T}$:
+$$
+\boldsymbol{\Lambda}' = \boldsymbol{\Lambda} \mathbf{T},
+$$
+где $\mathbf{T}^\top \mathbf{T} = \mathbf{I}$ (ортогональная матрица).
+
+\section{Визуализация результатов}
+
+\begin{figure}[H]
+\centering
+\IfFileExists{Task3_FactorLoadings.pdf}{%
+  \includegraphics[width=0.9\textwidth]{Task3_FactorLoadings.pdf}%
+}{%
+  \IfFileExists{Task3/Task3_FactorLoadings.pdf}{%
+    \includegraphics[width=0.9\textwidth]{Task3/Task3_FactorLoadings.pdf}%
+  }{%
+    \fbox{\parbox{0.9\textwidth}{\centering
+      \textbf{График не найден.} Запустите \texttt{task3.1.r}
+    }}%
+  }%
+}
+\caption{Теплокарты факторных нагрузок: до и после Varimax ротации}
+\label{fig:loadings}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\IfFileExists{Task3_ScreePlot.pdf}{%
+  \includegraphics[width=0.9\textwidth]{Task3_ScreePlot.pdf}%
+}{%
+  \IfFileExists{Task3/Task3_ScreePlot.pdf}{%
+    \includegraphics[width=0.9\textwidth]{Task3/Task3_ScreePlot.pdf}%
+  }{%
+    \fbox{\parbox{0.9\textwidth}{\centering
+      \textbf{График не найден.} Запустите \texttt{task3.1.r}
+    }}%
+  }%
+}
+\caption{Scree plot и доля объяснённой дисперсии}
+\label{fig:scree}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\IfFileExists{Task3_LoadingsComparison.pdf}{%
+  \includegraphics[width=0.9\textwidth]{Task3_LoadingsComparison.pdf}%
+}{%
+  \IfFileExists{Task3/Task3_LoadingsComparison.pdf}{%
+    \includegraphics[width=0.9\textwidth]{Task3/Task3_LoadingsComparison.pdf}%
+  }{%
+    \fbox{\parbox{0.9\textwidth}{\centering
+      \textbf{График не найден.} Запустите \texttt{task3.1.r}
+    }}%
+  }%
+}
+\caption{Сравнение факторных нагрузок до и после ротации}
+\label{fig:comparison}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\IfFileExists{Task3_Correlation.pdf}{%
+  \includegraphics[width=0.7\textwidth]{Task3_Correlation.pdf}%
+}{%
+  \IfFileExists{Task3/Task3_Correlation.pdf}{%
+    \includegraphics[width=0.7\textwidth]{Task3/Task3_Correlation.pdf}%
+  }{%
+    \fbox{\parbox{0.7\textwidth}{\centering
+      \textbf{График не найден.} Запустите \texttt{task3.1.r}
+    }}%
+  }%
+}
+\caption{Корреляционная матрица исходных переменных}
+\label{fig:correlation}
+\end{figure}
+
+\section{Выводы}
+
+\begin{enumerate}
+\item \textbf{Трёхфакторная модель} успешно выявила скрытую структуру данных, разделив переменные на три группы: экономические, социальные и экологические показатели.
+
+\item \textbf{Varimax ротация} значительно упростила интерпретацию факторов, сделав каждый фактор чётко связанным с определённой группой переменных.
+
+\item \textbf{Фактор 1 (Экономический)} объясняет вариацию экономических показателей (GDP, промышленность, торговля).
+
+\item \textbf{Фактор 2 (Социальный)} объясняет вариацию социальных показателей (образование, здравоохранение).
+
+\item \textbf{Фактор 3 (Экологический)} объясняет вариацию экологических показателей (качество воздуха и воды).
+
+\item \textbf{Общности переменных} показывают, какая доля дисперсии каждой переменной объясняется общими факторами. Переменные с низкой общностью (например, Random\_Noise) не связаны с выявленными факторами.
+
+\item \textbf{Ортогональность факторов} сохраняется после Varimax ротации, что означает их некоррелированность и упрощает интерпретацию.
+
+\item Метод факторного анализа успешно выявил латентную структуру данных, соответствующую ожидаемой трёхфакторной модели.
+\end{enumerate}
+
+\section{Приложение: Код на R}
+
+\begin{lstlisting}[language=R, basicstyle=\tiny, breaklines=true, breakatwhitespace=true, frame=single]
+# Factor Analysis (FA)
+# Task 3: Multivariate Statistical Analysis
+# Orthogonal factor model with 3 factors
+
+# Load necessary libraries
+library(MASS)
+library(psych)
+library(GPArotation)
+library(corrplot)
+library(ggplot2)
+
+# Set seed for reproducibility
+set.seed(2025)
+
+# --- Data Generation ---
+# Generate multivariate data with at least 7 dimensions
+# Using a dataset with 8 variables (dimensions)
+
+n <- 300  # Sample size
+
+# Create factor structure
+# Factor 1: Economic indicators (variables 1-3)
+# Factor 2: Social indicators (variables 4-5)
+# Factor 3: Environmental indicators (variables 6-7)
+# Variable 8: Noise/unique factor
+
+# Factor loadings matrix (8 variables x 3 factors)
+# This defines the true factor structure
+Lambda_true <- matrix(c(
+  # Factor 1 (Economic)
+  0.8, 0.0, 0.0,  # Var 1: GDP_Growth
+  0.75, 0.0, 0.0, # Var 2: Industrial_Output
+  0.7, 0.0, 0.0,  # Var 3: Trade_Balance
+  # Factor 2 (Social)
+  0.0, 0.8, 0.0,  # Var 4: Education_Level
+  0.0, 0.75, 0.0, # Var 5: Healthcare_Index
+  # Factor 3 (Environmental)
+  0.0, 0.0, 0.8,  # Var 6: Air_Quality
+  0.0, 0.0, 0.75, # Var 7: Water_Quality
+  # Noise
+  0.0, 0.0, 0.0   # Var 8: Random_Noise
+), nrow = 8, byrow = TRUE)
+
+# Unique variances (diagonal of Psi matrix)
+Psi <- diag(c(0.36, 0.44, 0.51, 0.36, 0.44, 0.36, 0.44, 0.95))
+
+# Generate correlation matrix from factor model
+# Sigma = Lambda * Lambda' + Psi
+Sigma <- Lambda_true %*% t(Lambda_true) + Psi
+
+# Ensure positive definiteness
+Sigma <- (Sigma + t(Sigma)) / 2
+eigen_vals <- eigen(Sigma)$values
+if (min(eigen_vals) < 0) {
+  Sigma <- Sigma + diag(rep(abs(min(eigen_vals)) + 0.01, 8))
+}
+
+# Mean vector
+mu_vec <- c(50, 60, 55, 30, 35, 40, 45, 20)
+
+# Generate multivariate normal data
+data <- mvrnorm(n = n, mu = mu_vec, Sigma = Sigma)
+
+# Convert to data frame with meaningful names
+colnames(data) <- c("GDP_Growth", "Industrial_Output", "Trade_Balance",
+                    "Education_Level", "Healthcare_Index",
+                    "Air_Quality", "Water_Quality", "Random_Noise")
+
+data_df <- as.data.frame(data)
+
+# --- Factor Analysis ---
+
+cat("\n=== FACTOR ANALYSIS: 3-Factor Orthogonal Model ===\n\n")
+
+# Case 1: Factor Analysis without rotation
+cat("--- Case 1: FA without rotation ---\n\n")
+
+fa_no_rotation <- fa(data_df, nfactors = 3, rotate = "none", 
+                     fm = "ml",  # Maximum likelihood
+                     scores = "regression")
+
+cat("Factor Loadings (no rotation):\n")
+print(round(fa_no_rotation$loadings, 4))
+
+cat("\nCommunalities:\n")
+print(round(fa_no_rotation$communality, 4))
+
+cat("\nEigenvalues:\n")
+print(round(fa_no_rotation$values, 4))
+
+cat("\nProportion of variance explained:\n")
+print(round(fa_no_rotation$Vaccounted, 4))
+
+# Case 2: Factor Analysis with Varimax rotation
+cat("\n\n--- Case 2: FA with Varimax rotation ---\n\n")
+
+fa_varimax <- fa(data_df, nfactors = 3, rotate = "varimax",
+                 fm = "ml",
+                 scores = "regression")
+
+cat("Factor Loadings (Varimax rotation):\n")
+print(round(fa_varimax$loadings, 4))
+
+cat("\nCommunalities:\n")
+print(round(fa_varimax$communality, 4))
+
+cat("\nEigenvalues:\n")
+print(round(fa_varimax$values, 4))
+
+cat("\nProportion of variance explained:\n")
+print(round(fa_varimax$Vaccounted, 4))
+
+cat("\nRotation matrix:\n")
+print(round(fa_varimax$rot.mat, 4))
+
+# --- Visualization ---
+
+# Save plots to PDF
+pdf("Task3/Task3_FactorLoadings.pdf", width = 14, height = 8)
+
+par(mfrow = c(1, 2))
+
+# Factor loadings without rotation
+loadings_no_rot <- as.matrix(fa_no_rotation$loadings)
+colnames(loadings_no_rot) <- paste0("Factor", 1:3)
+rownames(loadings_no_rot) <- colnames(data_df)
+
+# Create heatmap of loadings (no rotation)
+corrplot(loadings_no_rot, method = "color", is.corr = FALSE,
+         tl.cex = 0.8, tl.col = "black",
+         title = "Factor Loadings (No Rotation)",
+         mar = c(0, 0, 2, 0))
+
+# Factor loadings with Varimax rotation
+loadings_varimax <- as.matrix(fa_varimax$loadings)
+colnames(loadings_varimax) <- paste0("Factor", 1:3)
+rownames(loadings_varimax) <- colnames(data_df)
+
+# Create heatmap of loadings (Varimax)
+corrplot(loadings_varimax, method = "color", is.corr = FALSE,
+         tl.cex = 0.8, tl.col = "black",
+         title = "Factor Loadings (Varimax Rotation)",
+         mar = c(0, 0, 2, 0))
+
+dev.off()
+
+# Scree plot
+pdf("Task3/Task3_ScreePlot.pdf", width = 10, height = 6)
+
+par(mfrow = c(1, 2))
+
+# Scree plot for eigenvalues
+eigenvalues <- fa_no_rotation$values
+plot(1:8, eigenvalues, type = "b",
+     main = "Scree Plot: Eigenvalues",
+     xlab = "Factor Number", ylab = "Eigenvalue",
+     pch = 19, col = "blue", ylim = c(0, max(eigenvalues) * 1.1))
+abline(h = 1, lty = 2, col = "red")
+legend("topright", "Kaiser criterion (lambda=1)", lty = 2, col = "red")
+
+# Variance explained
+variance_explained <- fa_no_rotation$Vaccounted[2, ] * 100
+barplot(variance_explained, names.arg = paste0("Factor", 1:3),
+        main = "Variance Explained by Each Factor",
+        xlab = "Factor", ylab = "Variance (%)",
+        col = "steelblue", ylim = c(0, max(variance_explained) * 1.2))
+
+dev.off()
+
+# Comparison plot: Loadings before and after rotation
+pdf("Task3/Task3_LoadingsComparison.pdf", width = 14, height = 10)
+
+par(mfrow = c(2, 3))
+
+# Plot loadings for each factor (no rotation)
+for (i in 1:3) {
+  barplot(loadings_no_rot[, i], 
+          main = paste("Factor", i, "(No Rotation)"),
+          ylab = "Loading", xlab = "Variable",
+          col = "lightblue", las = 2, cex.names = 0.7,
+          ylim = c(-1, 1))
+  abline(h = 0, col = "black", lwd = 1)
+  abline(h = c(-0.3, 0.3), col = "gray", lty = 2)
+}
+
+# Plot loadings for each factor (Varimax rotation)
+for (i in 1:3) {
+  barplot(loadings_varimax[, i], 
+          main = paste("Factor", i, "(Varimax Rotation)"),
+          ylab = "Loading", xlab = "Variable",
+          col = "lightgreen", las = 2, cex.names = 0.7,
+          ylim = c(-1, 1))
+  abline(h = 0, col = "black", lwd = 1)
+  abline(h = c(-0.3, 0.3), col = "gray", lty = 2)
+}
+
+dev.off()
+
+# Correlation matrix
+pdf("Task3/Task3_Correlation.pdf", width = 8, height = 8)
+corrplot(cor(data_df), method = "circle", type = "upper",
+         order = "hclust", tl.cex = 0.8, tl.col = "black",
+         title = "Correlation Matrix of Original Variables")
+dev.off()
+
+# --- Save results for LaTeX report ---
+sink("Task3/Task3_analysis_results.txt")
+
+cat("=== FACTOR ANALYSIS RESULTS ===\n\n")
+cat("Dataset: Multivariate data with 8 variables\n")
+cat("Sample size:", n, "\n")
+cat("Number of factors: 3\n\n")
+
+cat("=== CASE 1: No Rotation ===\n\n")
+cat("Factor Loadings:\n")
+print(round(fa_no_rotation$loadings, 4))
+cat("\nCommunalities:\n")
+print(round(fa_no_rotation$communality, 4))
+cat("\nEigenvalues:\n")
+print(round(fa_no_rotation$values, 4))
+cat("\nVariance Accounted:\n")
+print(round(fa_no_rotation$Vaccounted, 4))
+
+cat("\n\n=== CASE 2: Varimax Rotation ===\n\n")
+cat("Factor Loadings:\n")
+print(round(fa_varimax$loadings, 4))
+cat("\nCommunalities:\n")
+print(round(fa_varimax$communality, 4))
+cat("\nEigenvalues:\n")
+print(round(fa_varimax$values, 4))
+cat("\nVariance Accounted:\n")
+print(round(fa_varimax$Vaccounted, 4))
+cat("\nRotation Matrix:\n")
+print(round(fa_varimax$rot.mat, 4))
+
+sink()
+
+cat("\n=== Analysis Complete ===\n")
+cat("Results saved to:\n")
+cat("  - Task3/Task3_FactorLoadings.pdf (loadings heatmaps)\n")
+cat("  - Task3/Task3_ScreePlot.pdf (scree plots)\n")
+cat("  - Task3/Task3_LoadingsComparison.pdf (comparison plots)\n")
+cat("  - Task3/Task3_Correlation.pdf (correlation matrix)\n")
+cat("  - Task3/Task3_analysis_results.txt (numerical results)\n")
+\end{lstlisting}
+
+\end{document}
+

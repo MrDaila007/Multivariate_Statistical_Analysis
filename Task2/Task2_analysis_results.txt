@@ -1,0 +1,45 @@
+=== PRINCIPAL COMPONENTS ANALYSIS RESULTS ===
+
+Dataset: Multivariate data with 6 variables
+Sample size: 200 
+
+=== CASE 1: 2 Principal Components ===
+
+Eigenvalues:
+[1] 2.2513 1.7173 0.9963 0.4887 0.3181 0.2282
+
+Proportion of variance:
+[1] 37.52 28.62 16.61  8.14  5.30  3.80
+
+Cumulative proportion:
+[1]  37.52  66.14  82.75  90.89  96.20 100.00
+
+Loadings (PC1, PC2):
+                      PC1     PC2
+GDP_Growth         0.5541 -0.1461
+Industrial_Output  0.5961 -0.0723
+Trade_Balance      0.5594 -0.0245
+Education_Level    0.0823  0.6970
+Healthcare_Index   0.1130  0.6975
+Random_Factor     -0.0725 -0.0208
+
+
+=== CASE 2: 3 Principal Components ===
+
+Eigenvalues:
+[1] 2.2513 1.7173 0.9963 0.4887 0.3181 0.2282
+
+Proportion of variance:
+[1] 37.52 28.62 16.61  8.14  5.30  3.80
+
+Cumulative proportion:
+[1]  37.52  66.14  82.75  90.89  96.20 100.00
+
+Loadings (PC1, PC2, PC3):
+                      PC1     PC2     PC3
+GDP_Growth         0.5541 -0.1461  0.0619
+Industrial_Output  0.5961 -0.0723  0.0673
+Trade_Balance      0.5594 -0.0245 -0.0139
+Education_Level    0.0823  0.6970  0.0018
+Healthcare_Index   0.1130  0.6975  0.0472
+Random_Factor     -0.0725 -0.0208  0.9946

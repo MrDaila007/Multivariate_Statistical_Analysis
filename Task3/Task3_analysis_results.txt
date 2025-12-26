@@ -1,0 +1,86 @@
+=== FACTOR ANALYSIS RESULTS ===
+
+Dataset: Multivariate data with 8 variables
+Sample size: 300 
+Number of factors: 3
+
+=== CASE 1: No Rotation ===
+
+Factor Loadings:
+
+Loadings:
+                  ML3    ML1    ML2   
+GDP_Growth         0.811              
+Industrial_Output  0.714              
+Trade_Balance      0.641              
+Education_Level           0.440  0.424
+Healthcare_Index          0.716  0.694
+Air_Quality       -0.151  0.404 -0.440
+Water_Quality             0.715 -0.695
+Random_Noise      -0.100  0.102       
+
+                 ML3   ML1   ML2
+SS loadings    1.612 1.393 1.365
+Proportion Var 0.202 0.174 0.171
+Cumulative Var 0.202 0.376 0.546
+
+Communalities:
+       GDP_Growth Industrial_Output     Trade_Balance   Education_Level 
+           0.6672            0.5100            0.4214            0.3753 
+ Healthcare_Index       Air_Quality     Water_Quality      Random_Noise 
+           0.9950            0.3796            0.9950            0.0270 
+
+Eigenvalues:
+[1]  1.7686  1.4011  1.1938  0.0920  0.0421 -0.0053 -0.0454 -0.0764
+
+Variance Accounted:
+                         ML3    ML1    ML2
+SS loadings           1.6124 1.3934 1.3647
+Proportion Var        0.2016 0.1742 0.1706
+Cumulative Var        0.2016 0.3757 0.5463
+Proportion Explained  0.3689 0.3188 0.3123
+Cumulative Proportion 0.3689 0.6877 1.0000
+
+
+=== CASE 2: Varimax Rotation ===
+
+Factor Loadings:
+
+Loadings:
+                  ML3    ML2    ML1   
+GDP_Growth         0.809              
+Industrial_Output  0.711              
+Trade_Balance      0.637 -0.115       
+Education_Level                  0.610
+Healthcare_Index                 0.997
+Air_Quality       -0.119  0.604       
+Water_Quality             0.996       
+Random_Noise              0.135       
+
+                 ML3   ML2   ML1
+SS loadings    1.595 1.401 1.375
+Proportion Var 0.199 0.175 0.172
+Cumulative Var 0.199 0.374 0.546
+
+Communalities:
+       GDP_Growth Industrial_Output     Trade_Balance   Education_Level 
+           0.6672            0.5100            0.4214            0.3753 
+ Healthcare_Index       Air_Quality     Water_Quality      Random_Noise 
+           0.9950            0.3796            0.9950            0.0270 
+
+Eigenvalues:
+[1]  1.7686  1.4011  1.1938  0.0920  0.0421 -0.0053 -0.0454 -0.0764
+
+Variance Accounted:
+                         ML3    ML2    ML1
+SS loadings           1.5952 1.4006 1.3748
+Proportion Var        0.1994 0.1751 0.1718
+Cumulative Var        0.1994 0.3745 0.5463
+Proportion Explained  0.3650 0.3205 0.3146
+Cumulative Proportion 0.3650 0.6854 1.0000
+
+Rotation Matrix:
+        [,1]    [,2]    [,3]
+[1,]  0.7071 -0.7051  0.0530
+[2,]  0.7068  0.7070 -0.0239
+[3,] -0.0207  0.0544  0.9983
